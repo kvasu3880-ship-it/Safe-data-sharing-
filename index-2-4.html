@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeShare – Hushh Safer Data Sharing</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #04040d;
+    --surface: #0b0b18;
+    --surface2: #121220;
+    --accent: #7c3aed;
+    --accent2: #00e5ff;
+    --accent3: #ff2d78;
+    --green: #00ffa3;
+    --red: #ff3b5c;
+    --orange: #ffb800;
+    --text: #eeeef8;
+    --muted: #5a5a82;
+    --border: #1e1e36;
+    --neon-purple: #c084fc;
+    --neon-cyan: #00e5ff;
+    --neon-pink: #ff2d78;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse at 15% 15%,rgba(124,58,237,0.18) 0%,transparent 50%),radial-gradient(ellipse at 85% 80%,rgba(0,229,255,0.1) 0%,transparent 50%),radial-gradient(ellipse at 50% 100%,rgba(255,45,120,0.06) 0%,transparent 50%); pointer-events:none; z-index:0; animation:bgshift 12s ease-in-out infinite alternate; }
+  @keyframes bgshift { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(20deg)} }
+  .page { display:none; min-height:100vh; position:relative; z-index:1; }
+  .page.active { display:block; animation:fadeUp 0.35s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  nav { display:flex; align-items:center; justify-content:space-between; padding:18px 36px; border-bottom:1px solid var(--border); position:sticky; top:0; background:rgba(4,4,13,0.92); backdrop-filter:blur(20px); z-index:200; box-shadow:0 1px 0 rgba(0,229,255,0.08); }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:18px; background:linear-gradient(135deg,#c084fc,var(--neon-cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 8px rgba(192,132,252,0.4)); }
+  .nav-tabs { display:flex; gap:4px; }
+  .tab { background:none; border:none; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; padding:8px 18px; border-radius:8px; transition:all 0.2s; }
+  .tab:hover { color:var(--text); background:var(--surface2); }
+  .tab.active { color:#a78bfa; background:rgba(124,58,237,0.12); }
+
+  .wrap { max-width:880px; margin:0 auto; padding:52px 32px 80px; }
+  .eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(124,58,237,0.12); border:1px solid rgba(124,58,237,0.25); color:#a78bfa; padding:5px 14px; border-radius:100px; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:24px; }
+  .dot { width:6px; height:6px; background:#a78bfa; border-radius:50%; animation:blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  h1 { font-family:'Syne',sans-serif; font-size:clamp(34px,5.5vw,58px); font-weight:800; line-height:1.1; letter-spacing:-1.5px; margin-bottom:16px; }
+  h1 em { font-style:normal; background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple),var(--neon-pink)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .lead { font-size:17px; color:var(--muted); line-height:1.65; max-width:520px; margin-bottom:36px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:48px; }
+  .btn-p { background:linear-gradient(135deg,var(--accent),#9333ea); color:#fff; border:none; padding:13px 26px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 20px rgba(124,58,237,0.35),0 0 0 1px rgba(192,132,252,0.15); }
+  .btn-p:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(124,58,237,0.55),0 0 20px rgba(192,132,252,0.2); }
+  .btn-s { background:var(--surface2); color:var(--text); border:1px solid var(--border); padding:13px 26px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+  .btn-s:hover { border-color:var(--muted); }
+
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:48px; }
+  .scard { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px 20px; transition:border-color 0.2s; }
+  .scard:hover { border-color:rgba(124,58,237,0.4); }
+  .snum { font-family:'Syne',sans-serif; font-size:34px; font-weight:800; background:linear-gradient(135deg,var(--neon-cyan),var(--neon-purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .slabel { color:var(--muted); font-size:12px; margin-top:4px; }
+  .sh { font-family:'Syne',sans-serif; font-size:22px; font-weight:700; margin-bottom:6px; }
+  .ss { color:var(--muted); font-size:14px; margin-bottom:28px; }
+
+  /* TIMER */
+  .timer-strip { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 22px; margin-bottom:22px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .timer-strip label { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; }
+  .timer-input-group { display:flex; gap:8px; align-items:center; flex-wrap:wrap; flex:1; }
+  .timer-select { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); cursor:pointer; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364648a'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:28px; }
+  .timer-select:focus { outline:none; border-color:#a78bfa; }
+  .timer-or { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+  .timer-num { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:14px; color:var(--text); width:64px; text-align:center; font-family:'DM Sans',sans-serif; }
+  .timer-num:focus { outline:none; border-color:#a78bfa; }
+  .timer-badge { margin-left:auto; background:rgba(124,58,237,0.12); border:1px solid rgba(124,58,237,0.25); color:#a78bfa; font-size:12px; font-weight:600; padding:6px 14px; border-radius:8px; min-width:130px; text-align:center; transition:all 0.3s; font-variant-numeric:tabular-nums; letter-spacing:0.3px; }
+  .timer-badge.active-countdown { background:rgba(16,185,129,0.12); border-color:rgba(16,185,129,0.3); color:var(--green); }
+  .timer-badge.warning-countdown { background:rgba(245,158,11,0.15); border-color:rgba(245,158,11,0.4); color:var(--orange); }
+  .timer-badge.critical-countdown { background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.5); color:var(--red); animation:blink-red 0.6s infinite; }
+  @keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  @keyframes blink-red { 0%,100%{opacity:1;background:rgba(239,68,68,0.2)} 50%{opacity:0.55;background:rgba(239,68,68,0.05)} }
+
+  /* FLOATING SESSION WIDGET */
+  #session-widget {
+    display: none;
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 800;
+    width: 300px;
+    background: linear-gradient(145deg, rgba(11,11,24,0.98), rgba(16,16,32,0.98));
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,229,255,0.08), 0 0 60px rgba(0,229,255,0.06);
+    font-family: 'DM Sans', sans-serif;
+    backdrop-filter: blur(24px);
+    animation: slideInWidget 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+  #session-widget.show { display: block; }
+  @keyframes slideInWidget { from{opacity:0;transform:translateY(24px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+  .sw-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .sw-logo { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; background:linear-gradient(135deg,#c084fc,#00e5ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .sw-live { display:flex; align-items:center; gap:5px; font-size:10px; font-weight:800; color:#00ffa3; letter-spacing:1.5px; }
+  .sw-live-dot { width:7px; height:7px; background:#00ffa3; border-radius:50%; box-shadow:0 0 8px #00ffa3; animation:blink 1.2s infinite; }
+  .sw-site-row { display:flex; align-items:center; gap:10px; background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.12); border-radius:12px; padding:10px 12px; margin-bottom:14px; }
+  .sw-site-icon { font-size:20px; }
+  .sw-site-info { flex:1; }
+  .sw-site-name { font-size:13px; font-weight:700; color:var(--text); }
+  .sw-site-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+  .sw-refocus { background:rgba(0,229,255,0.12); border:1px solid rgba(0,229,255,0.25); color:#00e5ff; font-size:11px; font-weight:700; padding:5px 10px; border-radius:8px; cursor:pointer; white-space:nowrap; transition:all 0.2s; font-family:'DM Sans',sans-serif; }
+  .sw-refocus:hover { background:rgba(0,229,255,0.22); }
+  .sw-divider { height:1px; background:var(--border); margin-bottom:14px; }
+  .sw-timer-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .sw-timer-display { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; text-align:center; font-variant-numeric:tabular-nums; letter-spacing:-1px; background:linear-gradient(135deg,#00e5ff,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px; transition:all 0.3s; }
+  .sw-timer-display.warn { background:linear-gradient(135deg,#ffb800,#ff2d78); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .sw-progress-track { height:4px; background:rgba(255,255,255,0.07); border-radius:100px; overflow:hidden; margin-bottom:14px; }
+  .sw-progress-bar { height:100%; background:linear-gradient(90deg,#00e5ff,#c084fc); border-radius:100px; width:100%; transition:width 1s linear, background 0.5s; }
+  .sw-progress-bar.warn { background:linear-gradient(90deg,#ffb800,#ff2d78); }
+  .sw-perms-row { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:14px; min-height:24px; }
+  .sw-perm-chip { font-size:10px; font-weight:600; padding:3px 9px; border-radius:100px; background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.18); color:#00e5ff; letter-spacing:0.3px; }
+  .sw-revoke-btn { width:100%; background:rgba(255,45,120,0.1); border:1px solid rgba(255,45,120,0.3); color:var(--neon-pink); padding:10px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; letter-spacing:0.3px; }
+  .sw-revoke-btn:hover { background:rgba(255,45,120,0.2); box-shadow:0 4px 16px rgba(255,45,120,0.2); }
+
+  /* EXPIRED OVERLAY — CYBERPUNK */
+  #expired-overlay { display:none; position:fixed; inset:0; background:rgba(4,4,13,0.97); z-index:900; align-items:center; justify-content:center; backdrop-filter:blur(24px); flex-direction:column; gap:0; }
+  #expired-overlay.show { display:flex; animation:fadeUp 0.4s ease; }
+  #expired-overlay::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,45,120,0.02) 2px,rgba(255,45,120,0.02) 4px); pointer-events:none; z-index:0; animation:scanlines 8s linear infinite; }
+  @keyframes scanlines { from{background-position:0 0} to{background-position:0 80px} }
+
+  .expired-box { position:relative; z-index:1; background:linear-gradient(145deg,rgba(11,11,24,0.98),rgba(18,18,36,0.98)); border:1px solid rgba(255,45,120,0.4); border-radius:28px; padding:52px 44px; max-width:460px; width:90%; text-align:center; box-shadow:0 0 80px rgba(255,45,120,0.2),0 0 160px rgba(255,45,120,0.05),inset 0 1px 0 rgba(255,255,255,0.05); overflow:hidden; }
+  .expired-box::before { content:''; position:absolute; top:-1px; left:15%; right:15%; height:2px; background:linear-gradient(90deg,transparent,var(--neon-pink),transparent); border-radius:100px; }
+  .expired-box::after { content:''; position:absolute; bottom:0; left:0; right:0; height:120px; background:radial-gradient(ellipse at 50% 100%,rgba(255,45,120,0.12),transparent 70%); pointer-events:none; }
+
+  .expired-icon-wrap { position:relative; width:90px; height:90px; margin:0 auto 24px; }
+  .expired-icon-ring { position:absolute; inset:0; border-radius:50%; border:2px solid rgba(255,45,120,0.4); animation:ring-pulse 2s ease-in-out infinite; }
+  .expired-icon-ring2 { position:absolute; inset:-8px; border-radius:50%; border:1px solid rgba(255,45,120,0.15); animation:ring-pulse 2s ease-in-out 0.4s infinite; }
+  @keyframes ring-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:0.5} }
+  .expired-icon-core { width:90px; height:90px; background:radial-gradient(circle,rgba(255,45,120,0.2),rgba(255,45,120,0.05)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; position:relative; z-index:1; }
+
+  .expired-label { font-size:10px; font-weight:800; letter-spacing:3px; text-transform:uppercase; color:var(--neon-pink); margin-bottom:12px; opacity:0.8; }
+  .expired-box h2 { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; background:linear-gradient(135deg,#fff,rgba(255,45,120,0.9)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:12px; letter-spacing:-0.5px; }
+  .expired-box p { font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:32px; }
+  .expired-stats { display:flex; gap:12px; margin-bottom:28px; }
+  .expired-stat { flex:1; background:rgba(255,45,120,0.06); border:1px solid rgba(255,45,120,0.15); border-radius:12px; padding:12px 10px; }
+  .expired-stat-n { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--neon-pink); }
+  .expired-stat-l { font-size:10px; color:var(--muted); margin-top:3px; letter-spacing:0.3px; }
+  .btn-expired-reset { width:100%; background:linear-gradient(135deg,var(--accent),#9333ea); color:#fff; border:none; padding:14px 32px; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:800; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 24px rgba(124,58,237,0.4),0 0 0 1px rgba(192,132,252,0.15); letter-spacing:0.3px; }
+  .btn-expired-reset:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(124,58,237,0.6),0 0 30px rgba(192,132,252,0.25); }
+
+  /* SUMMARY CARD */
+  .summary-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:48px; }
+  .sc-head { padding:24px 28px; background:linear-gradient(135deg,rgba(124,58,237,0.18),rgba(6,182,212,0.08)); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .sc-icon { width:50px; height:50px; border-radius:14px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+  .sc-head h3 { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; }
+  .sc-head p { color:var(--muted); font-size:13px; margin-top:2px; }
+  .sc-consent-tag { margin-left:auto; background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.25); color:var(--accent2); font-size:11px; font-weight:600; padding:5px 12px; border-radius:100px; text-transform:uppercase; letter-spacing:0.5px; }
+
+  .sc-items { padding:20px 28px; display:flex; flex-direction:column; gap:14px; }
+
+  /* PERMISSION BLOCK */
+  .perm-block { background:var(--surface2); border:1px solid var(--border); border-radius:14px; overflow:hidden; transition:border-color 0.2s; }
+  .perm-block:hover { border-color:rgba(124,58,237,0.35); }
+  .sc-item { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; }
+  .sc-item-l { display:flex; align-items:center; gap:14px; }
+  .sc-em { font-size:20px; }
+  .sc-name { font-size:14px; font-weight:500; }
+  .sc-subtext { font-size:12px; color:var(--muted); margin-top:2px; }
+  .risk-pill { font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; text-transform:uppercase; letter-spacing:0.4px; margin-right:10px; cursor:pointer; transition:transform 0.15s; border:none; }
+  .risk-pill:hover { transform:scale(1.1); }
+  .rl { background:rgba(16,185,129,0.15); color:var(--green); }
+  .rm { background:rgba(245,158,11,0.15); color:var(--orange); }
+  .rh { background:rgba(239,68,68,0.15); color:var(--red); }
+  .tog { width:46px; height:25px; background:var(--border); border-radius:100px; position:relative; cursor:pointer; border:none; transition:background 0.3s; flex-shrink:0; }
+  .tog::after { content:''; position:absolute; top:3px; left:3px; width:19px; height:19px; background:#fff; border-radius:50%; transition:transform 0.3s; }
+  .tog.on { background:var(--green); }
+  .tog.on::after { transform:translateX(21px); }
+
+  /* PURPOSE ROW */
+  .purpose-row { padding:10px 18px 14px; border-top:1px solid var(--border); background:rgba(124,58,237,0.05); display:flex; align-items:flex-start; gap:10px; }
+  .purpose-icon { font-size:13px; margin-top:1px; flex-shrink:0; }
+  .purpose-inner { flex:1; }
+  .purpose-label { font-size:10px; font-weight:700; color:#a78bfa; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+  .purpose-text { font-size:12px; color:var(--muted); line-height:1.6; }
+  .purpose-tip { display:inline-flex; align-items:center; gap:5px; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.2); color:var(--accent2); font-size:11px; padding:3px 10px; border-radius:100px; margin-top:6px; }
+  .purpose-warn { display:inline-flex; align-items:center; gap:5px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:var(--red); font-size:11px; padding:3px 10px; border-radius:100px; margin-top:6px; }
+
+  .sc-foot { padding:18px 28px; border-top:1px solid var(--border); background:rgba(7,7,15,0.4); display:flex; gap:10px; }
+  .btn-safe { flex:1; background:linear-gradient(135deg,#00c97a,#00ffa3,#00c97a); background-size:200%; color:#001a0f; border:none; padding:13px 20px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:800; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 24px rgba(0,255,163,0.35),0 0 0 1px rgba(0,255,163,0.2); letter-spacing:0.3px; }
+  .btn-safe:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,255,163,0.5),0 0 30px rgba(0,255,163,0.25); background-position:right; }
+  .btn-deny { flex:1; background:var(--surface2); color:var(--text); border:1px solid var(--border); padding:13px 20px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+  .btn-deny:hover { border-color:var(--red); color:var(--red); }
+
+  /* RISK CARDS */
+  .risk-section { margin-bottom:44px; }
+  .risk-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+  .rcard { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px; position:relative; overflow:hidden; transition:all 0.2s; cursor:pointer; }
+  .rcard::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; transition:opacity 0.2s; opacity:0; }
+  .rcard.low::after { background:var(--green); }
+  .rcard.med::after { background:var(--orange); }
+  .rcard.high::after { background:var(--red); }
+  .rcard:hover { transform:translateY(-3px); }
+  .rcard:hover::after { opacity:1; }
+  .rcard.low:hover { border-color:rgba(16,185,129,0.4); }
+  .rcard.med:hover { border-color:rgba(245,158,11,0.4); }
+  .rcard.high:hover { border-color:rgba(239,68,68,0.4); }
+  .rcard-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+  .rcard-em { font-size:28px; }
+  .risk-label { font-size:10px; font-weight:700; padding:4px 10px; border-radius:100px; text-transform:uppercase; letter-spacing:0.5px; }
+  .low .risk-label { background:rgba(16,185,129,0.15); color:var(--green); }
+  .med .risk-label { background:rgba(245,158,11,0.15); color:var(--orange); }
+  .high .risk-label { background:rgba(239,68,68,0.15); color:var(--red); }
+  .rcard-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; margin-bottom:8px; }
+  .rcard-desc { font-size:12px; color:var(--muted); line-height:1.55; margin-bottom:14px; }
+  .rcard-scope { background:var(--surface2); border-radius:8px; padding:10px 12px; font-size:11px; color:var(--muted); border:1px solid var(--border); }
+  .rcard-scope span { color:var(--text); font-weight:500; }
+  .rcard-foot { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
+  .rcard-status { font-size:12px; color:var(--muted); }
+  .rcard-status.on { color:var(--green); }
+
+  /* REVOKE PAGE */
+  .info-bar { background:rgba(6,182,212,0.08); border:1px solid rgba(6,182,212,0.2); border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+  .info-bar span { font-size:13px; color:#67e8f9; }
+
+  /* REVOKE BY USER */
+  .revoke-user-section { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:22px 24px; margin-bottom:32px; }
+  .revoke-user-section h4 { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:6px; }
+  .revoke-user-section p { font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.55; }
+  .user-list { display:flex; flex-direction:column; gap:10px; }
+  .user-row { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; transition:border-color 0.2s; flex-wrap:wrap; gap:10px; }
+  .user-row:hover { border-color:rgba(239,68,68,0.3); }
+  .user-row.revoked-user { opacity:0.35; pointer-events:none; }
+  .user-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+  .user-info { flex:1; }
+  .user-name { font-size:13px; font-weight:600; }
+  .user-role { font-size:11px; color:var(--muted); margin-top:2px; }
+  .user-access { font-size:10px; color:var(--muted); margin-top:2px; }
+  .purpose-badge-sm { font-size:10px; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.2); color:var(--accent2); padding:3px 9px; border-radius:100px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px; }
+  .btn-user-rev { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:var(--red); padding:7px 16px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .btn-user-rev:hover { background:rgba(239,68,68,0.2); }
+  .btn-user-rev-done { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:var(--green); padding:7px 16px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; }
+
+  /* REVOKE CONTROLS */
+  .revoke-controls { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center; }
+  .revoke-search { flex:1; min-width:180px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 16px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); transition:border-color 0.2s; }
+  .revoke-search:focus { outline:none; border-color:#a78bfa; }
+  .revoke-search::placeholder { color:var(--muted); }
+  .filter-btn { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; color:var(--muted); cursor:pointer; transition:all 0.2s; }
+  .filter-btn:hover, .filter-btn.active { background:rgba(124,58,237,0.15); border-color:rgba(124,58,237,0.4); color:#a78bfa; }
+
+  /* REV ITEMS */
+  .rev-list { display:flex; flex-direction:column; gap:12px; margin-bottom:24px; }
+  .rev-item { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; transition:all 0.3s; }
+  .rev-item-main { padding:18px 22px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .rev-item:hover { border-color:rgba(239,68,68,0.3); }
+  .rev-item.revoked { opacity:0.4; pointer-events:none; }
+  .rev-item.expanded { border-color:rgba(124,58,237,0.4); }
+  .rev-l { display:flex; align-items:center; gap:14px; }
+  .app-ico { width:46px; height:46px; border-radius:12px; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .app-n { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
+  .app-p { font-size:12px; color:var(--muted); margin-top:3px; }
+  .app-d { font-size:11px; color:var(--muted); margin-top:2px; }
+  .rev-r { display:flex; align-items:center; gap:8px; }
+  .audit-tag { font-size:10px; color:var(--muted); background:var(--surface2); padding:3px 8px; border-radius:6px; border:1px solid var(--border); }
+  .btn-expand { background:transparent; border:1px solid var(--border); color:var(--muted); padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif; }
+  .btn-expand:hover { border-color:var(--muted); color:var(--text); }
+  .btn-rev { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:var(--red); padding:8px 18px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .btn-rev:hover { background:rgba(239,68,68,0.2); }
+  .btn-rev-done { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:var(--green); padding:8px 18px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; }
+
+  .rev-detail { display:none; padding:0 22px 18px; border-top:1px solid var(--border); background:rgba(7,7,15,0.35); }
+  .rev-detail.open { display:block; animation:fadeUp 0.2s ease; }
+  .rev-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px; }
+  .rev-field-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+  .rev-purpose-input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-family:'DM Sans',sans-serif; font-size:12px; color:var(--text); resize:none; min-height:64px; transition:border-color 0.2s; }
+  .rev-purpose-input:focus { outline:none; border-color:#a78bfa; }
+  .rev-purpose-input::placeholder { color:var(--muted); }
+  .rev-timer-sel { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-family:'DM Sans',sans-serif; font-size:12px; color:var(--text); cursor:pointer; appearance:none; -webkit-appearance:none; width:100%; }
+  .rev-timer-sel:focus { outline:none; border-color:#a78bfa; }
+  .btn-revoke-confirm { margin-top:14px; width:100%; background:linear-gradient(135deg,var(--red),#b91c1c); color:#fff; border:none; padding:12px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+  .btn-revoke-confirm:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(239,68,68,0.35); }
+
+  .revoke-all { width:100%; background:var(--surface2); color:var(--muted); border:1px solid var(--border); padding:14px; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+  .revoke-all:hover { border-color:var(--red); color:var(--red); }
+
+  /* MODAL */
+  .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:500; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+  .overlay.show { display:flex; }
+  .modal { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:32px; max-width:420px; width:90%; animation:fadeUp 0.3s ease; }
+  .modal h3 { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; margin-bottom:12px; }
+  .modal p { font-size:14px; color:var(--muted); line-height:1.65; margin-bottom:20px; }
+  .modal-close { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:12px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; cursor:pointer; transition:all 0.2s; }
+  .modal-close:hover { border-color:var(--muted); }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px); padding:13px 22px; border-radius:12px; font-size:13px; font-weight:600; z-index:999; transition:transform 0.3s cubic-bezier(.34,1.56,.64,1); pointer-events:none; white-space:nowrap; }
+  .toast.green { background:linear-gradient(135deg,#00c97a,#00ffa3); color:#001a0f; box-shadow:0 6px 24px rgba(0,255,163,0.4); }
+  .toast.cyan  { background:linear-gradient(135deg,#0099bb,#00e5ff); color:#001a20; box-shadow:0 6px 24px rgba(0,229,255,0.4); }
+  .toast.red   { background:linear-gradient(135deg,#cc1a40,#ff3b5c); color:#fff; box-shadow:0 6px 24px rgba(255,59,92,0.4); }
+  .toast.amber { background:linear-gradient(135deg,#cc8800,#ffb800); color:#1a0f00; box-shadow:0 6px 24px rgba(255,184,0,0.4); }
+  .toast.show  { transform:translateX(-50%) translateY(0); }
+
+  @media(max-width:600px){
+    nav { padding:14px 18px; }
+    .wrap { padding:36px 18px 60px; }
+    .stats { grid-template-columns:1fr 1fr; }
+    .sc-foot { flex-direction:column; }
+    .risk-grid { grid-template-columns:1fr; }
+    .rev-detail-grid { grid-template-columns:1fr; }
+    .timer-strip { flex-direction:column; align-items:flex-start; }
+    .timer-badge { margin-left:0; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">hushh · SafeShare</div>
+  <div class="nav-tabs">
+    <button class="tab active" onclick="go('home',this)">Overview</button>
+    <button class="tab" onclick="go('risk',this)">Risk Explainer</button>
+    <button class="tab" onclick="go('revoke',this)">Revoke Access</button>
+  </div>
+</nav>
+
+<!-- PAGE 1: OVERVIEW -->
+<div class="page active" id="page-home">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> Explicit Consent · Scoped Sharing · Auditable</div>
+    <h1>Share data<br><em>on your terms.</em></h1>
+    <p class="lead">Before any information leaves your device through Hushh, you see exactly what's being shared, why, and the risk level — with one tap to approve or deny.</p>
+    <div class="row">
+      <button class="btn-p" onclick="go('risk', document.querySelectorAll('.tab')[1])">Understand the Risks →</button>
+      <button class="btn-s" onclick="go('revoke', document.querySelectorAll('.tab')[2])">Revoke Access</button>
+    </div>
+    <div class="stats">
+      <div class="scard"><div class="snum">4</div><div class="slabel">Active permissions</div></div>
+      <div class="scard"><div class="snum">3</div><div class="slabel">Connected apps</div></div>
+      <div class="scard"><div class="snum">86%</div><div class="slabel">Privacy score</div></div>
+    </div>
+
+    <!-- TIMER STRIP -->
+    <div class="timer-strip">
+      <label>⏱ Access expires after</label>
+      <div class="timer-input-group">
+        <select class="timer-select" id="timer-preset" onchange="applyPreset()">
+          <option value="">— Pick a duration —</option>
+          <option value="3600">1 hour</option>
+          <option value="21600">6 hours</option>
+          <option value="86400">24 hours</option>
+          <option value="604800">7 days</option>
+          <option value="2592000">30 days</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <span class="timer-or">or</span>
+        <input class="timer-num" id="timer-val" type="number" min="1" max="9999" placeholder="—" oninput="setCustomTimer()">
+        <select class="timer-select" id="timer-unit" onchange="setCustomTimer()" style="width:auto">
+          <option value="60">min</option>
+          <option value="3600" selected>hrs</option>
+          <option value="86400">days</option>
+        </select>
+      </div>
+      <div class="timer-badge" id="timer-badge">No expiry set</div>
+    </div>
+
+    <!-- AMAZON PERMISSION SUMMARY -->
+    <div class="sh">Permission Summary Card</div>
+    <p class="ss">Amazon is requesting access to your Hushh data. Review each permission and its purpose before sharing.</p>
+    <div class="summary-card">
+      <div class="sc-head">
+        <div class="sc-icon">🛒</div>
+        <div>
+          <h3>Amazon wants to access your data</h3>
+          <p>Scoped sharing · You control what gets shared</p>
+        </div>
+        <div class="sc-consent-tag">Explicit Consent</div>
+      </div>
+
+      <div class="sc-items">
+
+        <!-- 1 · Basic Profile Data -->
+        <div class="perm-block">
+          <div class="sc-item">
+            <div class="sc-item-l">
+              <span class="sc-em">📦</span>
+              <div>
+                <div class="sc-name">1 · Basic Profile Data</div>
+                <div class="sc-subtext">Name · Email address</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <button class="risk-pill rl" onclick="showRisk('low','Basic Profile Data','Your name and email are used only for account identification and order communication. Never sold to third parties or used for unsolicited marketing.')">LOW</button>
+              <button class="tog on" onclick="togSwitch(this)"></button>
+            </div>
+          </div>
+          <div class="purpose-row">
+            <span class="purpose-icon">👉</span>
+            <div class="purpose-inner">
+              <div class="purpose-label">Purpose</div>
+              <div class="purpose-text">Account identification &amp; verification · Order confirmation and shipping communication</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 · Location Data -->
+        <div class="perm-block">
+          <div class="sc-item">
+            <div class="sc-item-l">
+              <span class="sc-em">📍</span>
+              <div>
+                <div class="sc-name">2 · Location Data</div>
+                <div class="sc-subtext">City-level (recommended) · Precise location optional</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <button class="risk-pill rl" onclick="showRisk('low','Location Data','Hushh defaults to city-level only — your GPS coordinates are never shared. Precise location is an opt-in you can enable manually, but carries higher risk.')">LOW</button>
+              <button class="tog on" onclick="togSwitch(this)"></button>
+            </div>
+          </div>
+          <div class="purpose-row">
+            <span class="purpose-icon">👉</span>
+            <div class="purpose-inner">
+              <div class="purpose-label">Purpose</div>
+              <div class="purpose-text">Delivery availability check · Nearby deals &amp; local offers</div>
+              <div class="purpose-tip">💡 Hushh suggests: share <strong>city only</strong> — not your exact location</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 · Shopping Preferences -->
+        <div class="perm-block">
+          <div class="sc-item">
+            <div class="sc-item-l">
+              <span class="sc-em">🛍️</span>
+              <div>
+                <div class="sc-name">3 · Shopping Preferences</div>
+                <div class="sc-subtext">Category interests · Aggregate past purchase signals</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <button class="risk-pill rm" onclick="showRisk('med','Shopping Preferences','Anonymized category-level preferences (e.g. electronics, clothing) and aggregate purchase patterns are shared — not individual items, prices, or transactions.')">MED</button>
+              <button class="tog on" onclick="togSwitch(this)"></button>
+            </div>
+          </div>
+          <div class="purpose-row">
+            <span class="purpose-icon">👉</span>
+            <div class="purpose-inner">
+              <div class="purpose-label">Purpose</div>
+              <div class="purpose-text">Better personalised product recommendations based on your category interests and purchase patterns</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 · Payment Info -->
+        <div class="perm-block">
+          <div class="sc-item">
+            <div class="sc-item-l">
+              <span class="sc-em">💳</span>
+              <div>
+                <div class="sc-name">4 · Payment Info</div>
+                <div class="sc-subtext">UPI / Card — masked &amp; tokenized only · VERY sensitive</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <button class="risk-pill rh" onclick="showRisk('high','Payment Info','VERY sensitive. Only masked/tokenized identifiers shared — never raw card numbers or UPI IDs. Hushh strongly recommends keeping this OFF unless you need one-tap checkout. Disable immediately after use.')">HIGH</button>
+              <button class="tog" onclick="togSwitch(this)"></button>
+            </div>
+          </div>
+          <div class="purpose-row">
+            <span class="purpose-icon">👉</span>
+            <div class="purpose-inner">
+              <div class="purpose-label">Purpose</div>
+              <div class="purpose-text">Faster one-tap checkout · Pre-filled payment method at order confirmation</div>
+              <div class="purpose-warn">⚠️ Very sensitive — disabled by default. Enable only when needed.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 · Order History -->
+        <div class="perm-block">
+          <div class="sc-item">
+            <div class="sc-item-l">
+              <span class="sc-em">📦</span>
+              <div>
+                <div class="sc-name">5 · Order History</div>
+                <div class="sc-subtext">Category &amp; frequency of past orders</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <button class="risk-pill rm" onclick="showRisk('med','Order History','Aggregate order category and frequency data shared — not individual item names, prices, or delivery addresses. Used to surface deals and easy re-order suggestions.')">MED</button>
+              <button class="tog on" onclick="togSwitch(this)"></button>
+            </div>
+          </div>
+          <div class="purpose-row">
+            <span class="purpose-icon">👉</span>
+            <div class="purpose-inner">
+              <div class="purpose-label">Purpose</div>
+              <div class="purpose-text">Personalised deals on products you buy regularly · Easy re-order suggestions for frequent purchases</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 · Behaviour Data -->
+        <div class="perm-block">
+          <div class="sc-item">
+            <div class="sc-item-l">
+              <span class="sc-em">📊</span>
+              <div>
+                <div class="sc-name">6 · Behaviour Data</div>
+                <div class="sc-subtext">Anonymized click patterns · Time spent on categories</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <button class="risk-pill rm" onclick="showRisk('med','Behaviour Data','Anonymized interaction signals only — what category pages you visit and time spent. No raw browsing sessions, specific product views, or search terms are ever logged.')">MED</button>
+              <button class="tog" onclick="togSwitch(this)"></button>
+            </div>
+          </div>
+          <div class="purpose-row">
+            <span class="purpose-icon">👉</span>
+            <div class="purpose-inner">
+              <div class="purpose-label">Purpose</div>
+              <div class="purpose-text">Improve recommendation relevance · Surface trending items in categories you explore frequently</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="sc-foot">
+        <button class="btn-safe" onclick="shareSafely()">🛡️ Share Safely</button>
+        <button class="btn-deny" onclick="denyAll()">✕ Deny All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: RISK EXPLAINER -->
+<div class="page" id="page-risk">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> Risk Explanation Layer</div>
+    <h1>Know the risk<br><em>before you share.</em></h1>
+    <p class="lead">Every data type carries a risk level. Tap any card to understand exactly what gets shared, who sees it, and how Hushh protects you.</p>
+
+    <div class="risk-section">
+      <div class="sh">🟢 Low Risk — Safe to share</div>
+      <p class="ss">Anonymized or non-identifying data with minimal exposure</p>
+      <div class="risk-grid">
+        <div class="rcard low" onclick="showRisk('low','Basic Profile','Name and email for account identification only. Never sold or used for marketing via Hushh.')">
+          <div class="rcard-top"><span class="rcard-em">📦</span><span class="risk-label">Low Risk</span></div>
+          <div class="rcard-name">Basic Profile</div>
+          <div class="rcard-desc">Name and email for login and order communication only. Never shared beyond account use.</div>
+          <div class="rcard-scope">Scope: <span>Name · Email · Auth only</span></div>
+          <div class="rcard-foot"><span class="rcard-status on">● Active</span><button class="tog on" onclick="event.stopPropagation();togSwitch(this)"></button></div>
+        </div>
+        <div class="rcard low" onclick="showRisk('low','Location (City)','City-level only. GPS is never stored. Hushh recommends city over precise location.')">
+          <div class="rcard-top"><span class="rcard-em">📍</span><span class="risk-label">Low Risk</span></div>
+          <div class="rcard-name">Location (City)</div>
+          <div class="rcard-desc">Approximate city name only. GPS coordinates never stored or transmitted. Precise location disabled by default.</div>
+          <div class="rcard-scope">Scope: <span>City name only · Never GPS</span></div>
+          <div class="rcard-foot"><span class="rcard-status on">● Active</span><button class="tog on" onclick="event.stopPropagation();togSwitch(this)"></button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="risk-section">
+      <div class="sh">🟡 Medium Risk — Share with caution</div>
+      <p class="ss">Identifiable data shared only with verified, contracted partners</p>
+      <div class="risk-grid">
+        <div class="rcard med" onclick="showRisk('med','Shopping Preferences','Anonymized category preferences and aggregate purchase patterns. No individual product or transaction data shared.')">
+          <div class="rcard-top"><span class="rcard-em">🛍️</span><span class="risk-label">Medium Risk</span></div>
+          <div class="rcard-name">Shopping Preferences</div>
+          <div class="rcard-desc">Category-level interest clusters. No individual product or transaction data shared.</div>
+          <div class="rcard-scope">Scope: <span>Categories · Aggregate patterns</span></div>
+          <div class="rcard-foot"><span class="rcard-status on">● Active</span><button class="tog on" onclick="event.stopPropagation();togSwitch(this)"></button></div>
+        </div>
+        <div class="rcard med" onclick="showRisk('med','Order History','Aggregate order frequency by category. Item names, prices, and addresses are never shared.')">
+          <div class="rcard-top"><span class="rcard-em">📦</span><span class="risk-label">Medium Risk</span></div>
+          <div class="rcard-name">Order History</div>
+          <div class="rcard-desc">Order category and frequency only. Item names, prices, and addresses never shared.</div>
+          <div class="rcard-scope">Scope: <span>Category frequency · No items</span></div>
+          <div class="rcard-foot"><span class="rcard-status on">● Active</span><button class="tog on" onclick="event.stopPropagation();togSwitch(this)"></button></div>
+        </div>
+        <div class="rcard med" onclick="showRisk('med','Behaviour Data','Anonymized click and dwell signals. No raw browsing sessions or specific product views logged.')">
+          <div class="rcard-top"><span class="rcard-em">📊</span><span class="risk-label">Medium Risk</span></div>
+          <div class="rcard-name">Behaviour Data</div>
+          <div class="rcard-desc">Anonymized click patterns and time-on-category. No individual sessions or product views recorded.</div>
+          <div class="rcard-scope">Scope: <span>Click patterns · Anonymized</span></div>
+          <div class="rcard-foot"><span class="rcard-status">● Inactive</span><button class="tog" onclick="event.stopPropagation();togSwitch(this)"></button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="risk-section">
+      <div class="sh">🔴 High Risk — Think twice</div>
+      <p class="ss">Highly sensitive data — Hushh recommends keeping these disabled</p>
+      <div class="risk-grid">
+        <div class="rcard high" onclick="showRisk('high','Payment Info','VERY sensitive. Only masked tokens shared — never raw card or UPI details. Hushh strongly recommends keeping this OFF. Disable immediately after use.')">
+          <div class="rcard-top"><span class="rcard-em">💳</span><span class="risk-label">High Risk</span></div>
+          <div class="rcard-name">Payment Info</div>
+          <div class="rcard-desc">Masked UPI / card tokens only. Raw numbers are never transmitted. Disabled by default.</div>
+          <div class="rcard-scope">Scope: <span>⚠️ Masked tokens only</span></div>
+          <div class="rcard-foot"><span class="rcard-status">● Inactive</span><button class="tog" onclick="event.stopPropagation();togSwitch(this)"></button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: REVOKE -->
+<div class="page" id="page-revoke">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> Revocation Flow</div>
+    <h1>Revoke access<br><em>instantly.</em></h1>
+    <p class="lead">Remove any app's or person's access to your data with one tap. Revocation is immediate, logged, and auditable — you're always in control.</p>
+    <div class="info-bar">
+      <span>🔒</span>
+      <span>Revocation takes effect immediately. All past access is logged and auditable in your Hushh timeline.</span>
+    </div>
+
+    <!-- REVOKE BY USER -->
+    <div class="revoke-user-section">
+      <h4>👥 Revoke by User / Delegate</h4>
+      <p>These individuals have been granted access to view or manage your Hushh data. Remove their access individually or all at once.</p>
+      <div class="user-list">
+        <div class="user-row" id="user-row-1">
+          <div class="user-avatar">JM</div>
+          <div class="user-info">
+            <div class="user-name">Jamie Morris</div>
+            <div class="user-role">Delegate — full read access</div>
+            <div class="user-access">Granted 10 Feb 2026 · Last seen 1 hr ago</div>
+          </div>
+          <span class="purpose-badge-sm">Research</span>
+          <button class="btn-user-rev" onclick="revokeUser('user-row-1',this)">Revoke</button>
+        </div>
+        <div class="user-row" id="user-row-2">
+          <div class="user-avatar">PK</div>
+          <div class="user-info">
+            <div class="user-name">Priya Kapoor</div>
+            <div class="user-role">Admin — read + export</div>
+            <div class="user-access">Granted 25 Jan 2026 · Last seen 3 days ago</div>
+          </div>
+          <span class="purpose-badge-sm">Analytics</span>
+          <button class="btn-user-rev" onclick="revokeUser('user-row-2',this)">Revoke</button>
+        </div>
+        <div class="user-row" id="user-row-3">
+          <div class="user-avatar">AL</div>
+          <div class="user-info">
+            <div class="user-name">Alex Lee</div>
+            <div class="user-role">Viewer — location only</div>
+            <div class="user-access">Granted 5 Mar 2026 · Last seen now</div>
+          </div>
+          <span class="purpose-badge-sm">Safety</span>
+          <button class="btn-user-rev" onclick="revokeUser('user-row-3',this)">Revoke</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVOKE BY APP -->
+    <div class="sh" style="margin-bottom:6px">📱 Revoke by App</div>
+    <p class="ss">Expand any app to log a revocation purpose and set a scheduled timer.</p>
+
+    <div class="revoke-controls">
+      <input class="revoke-search" type="text" placeholder="🔍 Search apps…" oninput="filterRevoke(this.value)">
+      <button class="filter-btn active" onclick="filterByStatus('all',this)">All</button>
+      <button class="filter-btn" onclick="filterByStatus('active',this)">Active</button>
+      <button class="filter-btn" onclick="filterByStatus('revoked',this)">Revoked</button>
+    </div>
+
+    <div class="rev-list" id="rev-list">
+
+      <div class="rev-item" id="rev-amazon" data-name="amazon" data-status="active">
+        <div class="rev-item-main">
+          <div class="rev-l">
+            <div class="app-ico">🛒</div>
+            <div>
+              <div class="app-n">Amazon</div>
+              <div class="app-p">Profile · Location · Shopping · Payment · Orders · Behaviour</div>
+              <div class="app-d">Connected 20 Jan 2026 · Last access: 1 day ago</div>
+            </div>
+          </div>
+          <div class="rev-r">
+            <span class="audit-tag">Auditable ✓</span>
+            <button class="btn-expand" onclick="toggleDetail('rev-amazon')">Details ↓</button>
+            <button class="btn-rev" onclick="revokeApp('rev-amazon',this)">Revoke</button>
+          </div>
+        </div>
+        <div class="rev-detail" id="detail-rev-amazon">
+          <div class="rev-detail-grid">
+            <div>
+              <div class="rev-field-label">Revocation Purpose</div>
+              <textarea class="rev-purpose-input" placeholder="Why are you revoking? (logged to your audit trail)"></textarea>
+            </div>
+            <div>
+              <div class="rev-field-label">Scheduled Revocation Timer</div>
+              <select class="rev-timer-sel">
+                <option value="">Revoke immediately</option>
+                <option value="3600">In 1 hour</option>
+                <option value="86400">In 24 hours</option>
+                <option value="604800">In 7 days</option>
+              </select>
+              <div class="rev-field-label" style="margin-top:12px">Data Shared</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.6">Profile · Location · Shopping Prefs · Payment (masked) · Order History · Behaviour</div>
+            </div>
+          </div>
+          <button class="btn-revoke-confirm" onclick="revokeApp('rev-amazon', document.querySelector('#rev-amazon .btn-rev'))">⚠️ Confirm Revoke with Purpose</button>
+        </div>
+      </div>
+
+      <div class="rev-item" id="rev-maps" data-name="google maps" data-status="active">
+        <div class="rev-item-main">
+          <div class="rev-l">
+            <div class="app-ico">🗺️</div>
+            <div>
+              <div class="app-n">Google Maps</div>
+              <div class="app-p">Location · Search History</div>
+              <div class="app-d">Connected 3 Mar 2026 · Last access: 30 min ago</div>
+            </div>
+          </div>
+          <div class="rev-r">
+            <span class="audit-tag">Auditable ✓</span>
+            <button class="btn-expand" onclick="toggleDetail('rev-maps')">Details ↓</button>
+            <button class="btn-rev" onclick="revokeApp('rev-maps',this)">Revoke</button>
+          </div>
+        </div>
+        <div class="rev-detail" id="detail-rev-maps">
+          <div class="rev-detail-grid">
+            <div>
+              <div class="rev-field-label">Revocation Purpose</div>
+              <textarea class="rev-purpose-input" placeholder="Why are you revoking?"></textarea>
+            </div>
+            <div>
+              <div class="rev-field-label">Scheduled Revocation Timer</div>
+              <select class="rev-timer-sel">
+                <option value="">Revoke immediately</option>
+                <option value="3600">In 1 hour</option>
+                <option value="86400">In 24 hours</option>
+                <option value="604800">In 7 days</option>
+              </select>
+              <div class="rev-field-label" style="margin-top:12px">Data Shared</div>
+              <div style="font-size:12px;color:var(--muted)">Location · Search History</div>
+            </div>
+          </div>
+          <button class="btn-revoke-confirm" onclick="revokeApp('rev-maps', document.querySelector('#rev-maps .btn-rev'))">⚠️ Confirm Revoke with Purpose</button>
+        </div>
+      </div>
+
+      <div class="rev-item" id="rev-insta" data-name="instagram" data-status="active">
+        <div class="rev-item-main">
+          <div class="rev-l">
+            <div class="app-ico">📸</div>
+            <div>
+              <div class="app-n">Instagram</div>
+              <div class="app-p">Photo Library · Contacts · Location</div>
+              <div class="app-d">Connected 10 Mar 2026 · Last access: 5 min ago</div>
+            </div>
+          </div>
+          <div class="rev-r">
+            <span class="audit-tag">Auditable ✓</span>
+            <button class="btn-expand" onclick="toggleDetail('rev-insta')">Details ↓</button>
+            <button class="btn-rev" onclick="revokeApp('rev-insta',this)">Revoke</button>
+          </div>
+        </div>
+        <div class="rev-detail" id="detail-rev-insta">
+          <div class="rev-detail-grid">
+            <div>
+              <div class="rev-field-label">Revocation Purpose</div>
+              <textarea class="rev-purpose-input" placeholder="Why are you revoking?"></textarea>
+            </div>
+            <div>
+              <div class="rev-field-label">Scheduled Revocation Timer</div>
+              <select class="rev-timer-sel">
+                <option value="">Revoke immediately</option>
+                <option value="3600">In 1 hour</option>
+                <option value="86400">In 24 hours</option>
+                <option value="604800">In 7 days</option>
+              </select>
+              <div class="rev-field-label" style="margin-top:12px">Data Shared</div>
+              <div style="font-size:12px;color:var(--muted)">Photo Library · Contacts · Location</div>
+            </div>
+          </div>
+          <button class="btn-revoke-confirm" onclick="revokeApp('rev-insta', document.querySelector('#rev-insta .btn-rev'))">⚠️ Confirm Revoke with Purpose</button>
+        </div>
+      </div>
+
+    </div>
+    <button class="revoke-all" onclick="revokeAllApps()">⚠️ Revoke All App Access</button>
+  </div>
+</div>
+
+<!-- RISK MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+    <button class="modal-close" onclick="closeModal()">Got it, close</button>
+  </div>
+</div>
+
+<!-- FLOATING SESSION WIDGET (shown while Amazon is open in new tab) -->
+<div id="session-widget">
+  <div class="sw-header">
+    <div class="sw-logo">hushh · SafeShare</div>
+    <div class="sw-live"><span class="sw-live-dot"></span>LIVE</div>
+  </div>
+  <div class="sw-site-row">
+    <div class="sw-site-icon">&#x1F6CD;</div>
+    <div class="sw-site-info">
+      <div class="sw-site-name">amazon.com</div>
+      <div class="sw-site-sub" id="sw-tab-status">Opened in new tab</div>
+    </div>
+    <button class="sw-refocus" onclick="refocusAmazon()">Go to tab &#x2197;</button>
+  </div>
+  <div class="sw-divider"></div>
+  <div class="sw-timer-label">Session ends in</div>
+  <div class="sw-timer-display" id="sw-timer-display">--:--</div>
+  <div class="sw-progress-track"><div class="sw-progress-bar" id="sw-progress-bar"></div></div>
+  <div class="sw-perms-row" id="sw-perms-row"></div>
+  <button class="sw-revoke-btn" onclick="revokeSessionNow()">&#x2298; Revoke Access Now</button>
+</div>
+
+div>
+
+<!-- EXPIRED OVERLAY -->
+<div id="expired-overlay">
+  <div class="expired-box">
+    <div class="expired-icon-wrap">
+      <div class="expired-icon-ring"></div>
+      <div class="expired-icon-ring2"></div>
+      <div class="expired-icon-core">🔒</div>
+    </div>
+    <div class="expired-label">Session Terminated</div>
+    <h2>Access Revoked</h2>
+    <p>Your timed data-sharing session has ended. All permissions were automatically revoked and your data is fully protected again.</p>
+    <div class="expired-stats">
+      <div class="expired-stat"><div class="expired-stat-n">0</div><div class="expired-stat-l">Active perms</div></div>
+      <div class="expired-stat"><div class="expired-stat-n">✓</div><div class="expired-stat-l">Data secured</div></div>
+      <div class="expired-stat"><div class="expired-stat-n" id="exp-dur">—</div><div class="expired-stat-l">Session time</div></div>
+    </div>
+    <button class="btn-expired-reset" onclick="resetTimer()">↩ Set New Session</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function go(name, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function toast(msg, type='green') {
+    const t = document.getElementById('toast');
+    t.className = 'toast ' + type;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function togSwitch(btn) {
+    btn.classList.toggle('on');
+    const statusEl = btn.closest('.rcard-foot')?.querySelector('.rcard-status');
+    if (statusEl) {
+      statusEl.classList.toggle('on', btn.classList.contains('on'));
+      statusEl.textContent = btn.classList.contains('on') ? '● Active' : '● Inactive';
+    }
+    toast(btn.classList.contains('on') ? '✅ Permission enabled' : '🔒 Permission disabled');
+  }
+
+  let amazonTab = null;
+
+  function shareSafely() {
+    const active = document.querySelectorAll('#page-home .tog.on').length;
+    if (active === 0) {
+      toast('⚠️ Enable at least one permission before sharing.', 'amber');
+      return;
+    }
+    // Collect perm names for widget chips
+    const permNames = [];
+    document.querySelectorAll('#page-home .tog.on').forEach(tog => {
+      const name = tog.closest('.sc-item, .rcard')?.querySelector('.sc-name, .rcard-name')?.textContent?.trim();
+      if (name) permNames.push(name.replace(/^\d+\s*·?\s*/, ''));
+    });
+
+    if (timerSeconds > 0) {
+      startCountdown();
+    }
+    // Open real Amazon in a new tab
+    amazonTab = window.open('https://www.amazon.com', '_blank');
+
+    // Show floating session widget
+    const widget = document.getElementById('session-widget');
+    widget.classList.add('show');
+
+    // Populate perm chips
+    const row = document.getElementById('sw-perms-row');
+    row.innerHTML = permNames.slice(0,5).map(n => `<span class="sw-perm-chip">${n}</span>`).join('');
+
+    syncWidget();
+    let msg = '🛡️ Amazon opened · ' + active + ' permission(s) shared';
+    if (timerSeconds > 0) msg += ' · expires in ' + formatDuration(_lastTimerSeconds);
+    toast(msg, 'cyan');
+  }
+
+  function refocusAmazon() {
+    if (amazonTab && !amazonTab.closed) {
+      amazonTab.focus();
+    } else {
+      amazonTab = window.open('https://www.amazon.com', '_blank');
+    }
+  }
+
+  function revokeSessionNow() {
+    closeSession(true);
+  }
+
+  function closeSession(manual = false) {
+    if (amazonTab && !amazonTab.closed) { amazonTab.close(); }
+    amazonTab = null;
+    document.getElementById('session-widget').classList.remove('show');
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    if (manual) {
+      document.querySelectorAll('.tog.on').forEach(t => t.classList.remove('on'));
+      document.getElementById('exp-dur').textContent = formatDuration(_lastTimerSeconds - countdownRemaining) || '—';
+      document.getElementById('expired-overlay').classList.add('show');
+      const b = document.getElementById('timer-badge');
+      b.textContent = '🔒 Revoked';
+      b.style.background = 'rgba(255,45,120,0.1)';
+      b.style.borderColor = 'rgba(255,45,120,0.4)';
+      b.style.color = 'var(--neon-pink)';
+      timerSeconds = 0; countdownRemaining = 0;
+    }
+  }
+
+  function denyAll() {
+    document.querySelectorAll('#page-home .tog.on').forEach(t => t.classList.remove('on'));
+    toast('✕ All sharing denied. Your data stays private.', 'red');
+  }
+
+  // LIVE COUNTDOWN TIMER
+  let timerSeconds = 0;       // configured duration
+  let _lastTimerSeconds = 0;  // remember original for expired display
+  let countdownRemaining = 0; // live ticking value
+  let countdownInterval = null;
+
+  function syncWidget() {
+    const disp = document.getElementById('sw-timer-display');
+    const bar = document.getElementById('sw-progress-bar');
+    if (!disp) return;
+    if (countdownInterval && countdownRemaining > 0) {
+      disp.textContent = formatCountdown(countdownRemaining);
+      const pct = (_lastTimerSeconds > 0) ? (countdownRemaining / _lastTimerSeconds) * 100 : 100;
+      bar.style.width = pct + '%';
+      const isWarn = countdownRemaining <= 30;
+      disp.classList.toggle('warn', isWarn);
+      bar.classList.toggle('warn', isWarn);
+    } else if (!countdownInterval && timerSeconds === 0) {
+      disp.textContent = '∞';
+      bar.style.width = '100%';
+      disp.classList.remove('warn');
+      bar.classList.remove('warn');
+    } else {
+      disp.textContent = formatCountdown(timerSeconds);
+      bar.style.width = '100%';
+    }
+  }
+
+  function formatDuration(s) {
+    if (!s) return 'No expiry set';
+    const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    const p = [];
+    if (d) p.push(d+'d');
+    if (h) p.push(h+'h');
+    if (m) p.push(m+'m');
+    if (!d && !h && !m) p.push(sec+'s');        // show seconds only for short durations
+    else if (!d && !h && sec) p.push(sec+'s');  // show seconds alongside minutes
+    return p.join(' ');
+  }
+
+  function formatCountdown(s) {
+    if (s >= 3600) {
+      const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+      return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+    }
+    const m = Math.floor(s/60), sec = s%60;
+    return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+  }
+
+  function updateBadge() {
+    const b = document.getElementById('timer-badge');
+    b.classList.remove('active-countdown','warning-countdown','critical-countdown');
+    if (countdownInterval && countdownRemaining > 0) {
+      // Live ticking mode
+      const label = '⏱ ' + formatCountdown(countdownRemaining);
+      b.textContent = label;
+      if (countdownRemaining <= 10) {
+        b.classList.add('critical-countdown');
+      } else if (countdownRemaining <= 60) {
+        b.classList.add('warning-countdown');
+      } else {
+        b.classList.add('active-countdown');
+      }
+    } else if (timerSeconds > 0 && !countdownInterval) {
+      // Configured but not started
+      b.textContent = '⏱ ' + formatDuration(timerSeconds);
+      b.classList.add('active-countdown');
+    } else {
+      b.textContent = 'No expiry set';
+    }
+  }
+
+  function startCountdown() {
+    if (countdownInterval) clearInterval(countdownInterval);
+    if (timerSeconds <= 0) return;
+    _lastTimerSeconds = timerSeconds;
+    countdownRemaining = timerSeconds;
+    updateBadge();
+    syncWidget();
+    countdownInterval = setInterval(() => {
+      countdownRemaining--;
+      updateBadge();
+      syncWidget();
+      if (countdownRemaining <= 0) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+        onTimerExpired();
+      }
+    }, 1000);
+  }
+
+  function onTimerExpired() {
+    // Close Amazon tab & hide widget
+    if (amazonTab && !amazonTab.closed) { amazonTab.close(); }
+    amazonTab = null;
+    document.getElementById('session-widget').classList.remove('show');
+    // Disable all toggles
+    document.querySelectorAll('.tog.on').forEach(t => t.classList.remove('on'));
+    // Set session duration display
+    document.getElementById('exp-dur').textContent = formatDuration(_lastTimerSeconds);
+    // Show expired overlay
+    document.getElementById('expired-overlay').classList.add('show');
+    const b = document.getElementById('timer-badge');
+    b.textContent = '🔒 Expired';
+    b.classList.remove('active-countdown','warning-countdown','critical-countdown');
+    b.style.background = 'rgba(255,45,120,0.1)';
+    b.style.borderColor = 'rgba(255,45,120,0.4)';
+    b.style.color = 'var(--neon-pink)';
+    timerSeconds = 0;
+    countdownRemaining = 0;
+  }
+
+  function resetTimer() {
+    document.getElementById('expired-overlay').classList.remove('show');
+    document.getElementById('session-widget').classList.remove('show');
+    const b = document.getElementById('timer-badge');
+    b.style.cssText = '';
+    timerSeconds = 0;
+    _lastTimerSeconds = 0;
+    countdownRemaining = 0;
+    document.getElementById('timer-preset').value = '';
+    document.getElementById('timer-val').value = '';
+    updateBadge();
+    syncWidget();
+    // Re-enable default permissions
+    document.querySelectorAll('#page-home .tog').forEach((t,i) => { if(i<3) t.classList.add('on'); });
+    go('home', document.querySelectorAll('.tab')[0]);
+    toast('⏱ Timer cleared — set a new duration to begin sharing.', 'amber');
+  }
+
+  function applyPreset() {
+    const v = document.getElementById('timer-preset').value;
+    if (v === 'custom') { document.getElementById('timer-val').focus(); return; }
+    timerSeconds = v ? parseInt(v) : 0;
+    document.getElementById('timer-val').value = '';
+    countdownRemaining = 0;
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    updateBadge();
+    if (timerSeconds) {
+      toast('⏱ Timer set: ' + formatDuration(timerSeconds) + ' — starts when you click Share Safely', 'amber');
+    }
+  }
+
+  function setCustomTimer() {
+    const val = parseInt(document.getElementById('timer-val').value) || 0;
+    const unit = parseInt(document.getElementById('timer-unit').value) || 3600;
+    timerSeconds = val * unit;
+    if (val > 0) document.getElementById('timer-preset').value = '';
+    countdownRemaining = 0;
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    updateBadge();
+  }
+
+  // REVOKE APP
+  function revokeApp(id, btn) {
+    const item = document.getElementById(id);
+    item.classList.add('revoked');
+    item.dataset.status = 'revoked';
+    item.querySelectorAll('.btn-rev').forEach(b => { b.outerHTML = '<button class="btn-rev-done">✓ Revoked</button>'; });
+    const cf = item.querySelector('.btn-revoke-confirm');
+    if (cf) cf.remove();
+    toast('✅ Access revoked — logged to your audit trail.', 'green');
+  }
+  function revokeAllApps() {
+    document.querySelectorAll('.rev-item:not(.revoked)').forEach(item => {
+      item.classList.add('revoked');
+      item.dataset.status = 'revoked';
+      const b = item.querySelector('.btn-rev');
+      if (b) b.outerHTML = '<button class="btn-rev-done">✓ Revoked</button>';
+    });
+    toast('⚠️ All app access revoked immediately.', 'red');
+  }
+
+  // REVOKE USER
+  function revokeUser(rowId, btn) {
+    document.getElementById(rowId).classList.add('revoked-user');
+    btn.outerHTML = '<button class="btn-user-rev-done">✓ Revoked</button>';
+    toast('✅ User access revoked and logged.', 'green');
+  }
+
+  // EXPAND DETAIL
+  function toggleDetail(id) {
+    const detail = document.getElementById('detail-' + id);
+    const item = document.getElementById(id);
+    const isOpen = detail.classList.contains('open');
+    document.querySelectorAll('.rev-detail.open').forEach(d => {
+      d.classList.remove('open');
+      d.closest('.rev-item')?.classList.remove('expanded');
+    });
+    document.querySelectorAll('.btn-expand').forEach(b => { b.textContent = 'Details ↓'; });
+    if (!isOpen) {
+      detail.classList.add('open');
+      item.classList.add('expanded');
+      item.querySelector('.btn-expand').textContent = 'Close ↑';
+    }
+  }
+
+  // FILTER
+  let currentStatus = 'all';
+  function filterRevoke(q='') {
+    document.querySelectorAll('.rev-item').forEach(item => {
+      const nameMatch = (item.dataset.name||'').includes(q.toLowerCase());
+      const statusMatch = currentStatus === 'all' || item.dataset.status === currentStatus;
+      item.style.display = (nameMatch && statusMatch) ? '' : 'none';
+    });
+  }
+  function filterByStatus(status, btn) {
+    currentStatus = status;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterRevoke(document.querySelector('.revoke-search')?.value || '');
+  }
+
+  // MODAL
+  const riskColors = { low:'🟢 Low Risk', med:'🟡 Medium Risk', high:'🔴 High Risk' };
+  function showRisk(level, name, desc) {
+    document.getElementById('modal-title').textContent = riskColors[level] + ' · ' + name;
+    document.getElementById('modal-body').textContent = desc;
+    document.getElementById('overlay').classList.add('show');
+  }
+  function closeModal() { document.getElementById('overlay').classList.remove('show'); }
+</script>
+</body>
+</html>
